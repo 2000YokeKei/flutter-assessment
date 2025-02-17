@@ -14,7 +14,7 @@ class HistoryPage extends StatelessWidget {
       ),
       body: BlocBuilder<ActivityCubit, ActivityState>(
         builder: (context, state) {
-          final activities = state.recentActivities;
+          final activities = state.recentActivities.reversed.toList();
           final selectedActivityType = state.selectedActivityType;
 
           if (activities.isEmpty) {

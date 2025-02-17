@@ -4,6 +4,7 @@ import 'package:flutter_assesment/service/api_activity.dart';
 import 'package:flutter_assesment/model/model.dart';
 import 'package:flutter_assesment/view/history.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -19,21 +20,32 @@ class _MyHomePageState extends State<MyHomePage> {
   late String activityName = '';
   late double activityPrice = 0;
   late String activityType = '';
-  String _selectedActivityType = '';
+  late String selectedActivityType = '';
+  late Activity activity;
+
+  @override
+  void initState() {
+    super.initState();
+    loadSelectedActivityType();
+  }
+
+  
 
   Future<void> _fetchActivity() async {
     setState(() {
       _isLoading = true; 
     });
     try {
-      Activity activity = await ActivityService.fetchActivity(_selectedActivityType);
+      activity = await ActivityService.fetchActivity(selectedActivityType);
       setState(() {
         activityName = activity.activity ?? "No activity available";
         activityPrice = activity.price ?? 0.0;
         activityType = activity.type ?? "No activity type";
         final activityCubit = context.read<ActivityCubit>();
         activityCubit.addActivity(activity);
+        print(activityCubit.state.recentActivities.length);
       });
+      await _saveRecentActivity(activity);
     } catch (e) {
       setState(() {
         activityName = "Failed to load activity";
@@ -46,10 +58,29 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
-  
+
+    Future<void> loadSelectedActivityType() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedActivityType = prefs.getString('selectedActivityType') ?? '';
+      activityName = prefs.getString('recentActivityName') ?? 'No activity available';
+      activityPrice = prefs.getDouble('recentActivityPrice') ?? 0.0;
+      activityType = prefs.getString('recentActivityType') ?? 'None';
+    });
+  }
+
+   Future<void> _saveRecentActivity(Activity activity) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('recentActivityName', activity.activity ?? 'No activity available');
+    await prefs.setDouble('recentActivityPrice', activity.price ?? 0.0);
+    await prefs.setString('recentActivityType', activity.type ?? 'None');
+    await prefs.setString('selectedActivityType', selectedActivityType);
+  }
+
   @override
   Widget build(BuildContext context) {
     final activityCubit = context.read<ActivityCubit>();
+    selectedActivityType = activityCubit.state.selectedActivityType;
     Set<String> type = activityCubit.state.recentActivities.map((e) => e.type ?? '').toSet();
     return Scaffold(
       appBar: AppBar(
@@ -71,13 +102,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
             const SizedBox(height: 16),
             DropdownButton<String>(
-              value: _selectedActivityType.isEmpty ? null : _selectedActivityType,
+              value: selectedActivityType.isEmpty ? null : selectedActivityType,
               hint: Text("Select Activity Type"),
               onChanged: (String? newValue) {
                 setState(() {
-                _selectedActivityType = newValue ?? '';
+                selectedActivityType = newValue ?? '';
                 });
-                activityCubit.setSelectedActivityType(_selectedActivityType); 
+                activityCubit.setSelectedActivityType(selectedActivityType); 
               },
               items: type.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
