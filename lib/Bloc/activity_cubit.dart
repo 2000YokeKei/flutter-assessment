@@ -3,16 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ActivityState {
   final List<Activity> recentActivities;
+  final String selectedActivityType;
 
-  ActivityState({this.recentActivities = const []});
+  ActivityState({this.recentActivities = const [], this.selectedActivityType = ''});
 
-  ActivityState copyWith({List<Activity>? recentActivities}) {
+  ActivityState copyWith({List<Activity>? recentActivities, String? selectedActivityType}) {
     return ActivityState(
       recentActivities: recentActivities ?? this.recentActivities,
+      selectedActivityType: selectedActivityType ?? this.selectedActivityType,
     );
   }
 }
-
 
 class ActivityCubit extends Cubit<ActivityState> {
   ActivityCubit() : super(ActivityState());
@@ -20,7 +21,6 @@ class ActivityCubit extends Cubit<ActivityState> {
   void addActivity(Activity activity) {
     final updatedActivities = List<Activity>.from(state.recentActivities);
     updatedActivities.insert(0, activity);
-
 
     if (updatedActivities.length > 50) {
       updatedActivities.removeLast();
@@ -30,9 +30,7 @@ class ActivityCubit extends Cubit<ActivityState> {
     print('Added activity: ${activity.activity}, Total: ${updatedActivities.length}');
   }
 
-  // Clear all activities
-  void clearActivities() {
-    emit(state.copyWith(recentActivities: []));
-    print('Cleared all activities');
+  void setSelectedActivityType(String type) {
+    emit(state.copyWith(selectedActivityType: type));
   }
 }
