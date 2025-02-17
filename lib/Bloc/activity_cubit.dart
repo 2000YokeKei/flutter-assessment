@@ -30,7 +30,6 @@ class ActivityCubit extends Cubit<ActivityState> {
     _saveState(); 
   }
 
-  // Set the selected activity type
   void setSelectedActivityType(String type) {
     emit(ActivityState(recentActivities: state.recentActivities, selectedActivityType: type));
     _saveState(); 
