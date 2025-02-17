@@ -3,9 +3,14 @@ import 'package:http/http.dart' as http;
 import '../model/model.dart';
 
 class ActivityService {
- static const String baseUrl = 'https://bored.api.lewagon.com/api/activity/';
+  static Future<Activity> fetchActivity(String? type) async {
+     late String baseUrl = '';
+    if(type == null){
+      baseUrl = 'https://bored.api.lewagon.com/api/activity/';
+    }else{
+      baseUrl = 'https://bored.api.lewagon.com/api/activity/?type=$type';
+    }
 
-  static Future<Activity> fetchActivity() async {
     try {
       final response = await http.get(Uri.parse(baseUrl));
       if (response.statusCode == 200) {

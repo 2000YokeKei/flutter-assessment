@@ -27,7 +27,6 @@ class ActivityCubit extends Cubit<ActivityState> {
     }
 
     emit(state.copyWith(recentActivities: updatedActivities));
-    print('Added activity: ${activity.activity}, Total: ${updatedActivities.length}');
   }
 
   void setSelectedActivityType(String type) {

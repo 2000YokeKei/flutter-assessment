@@ -18,24 +18,26 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
   late String activityName = '';
   late double activityPrice = 0;
-   String _selectedActivityType = '';
+  late String activityType = '';
+  String _selectedActivityType = '';
 
   Future<void> _fetchActivity() async {
     setState(() {
       _isLoading = true; 
     });
     try {
-      Activity activity = await ActivityService.fetchActivity();
+      Activity activity = await ActivityService.fetchActivity(_selectedActivityType);
       setState(() {
         activityName = activity.activity ?? "No activity available";
         activityPrice = activity.price ?? 0.0;
+        activityType = activity.type ?? "No activity type";
         final activityCubit = context.read<ActivityCubit>();
         activityCubit.addActivity(activity);
-      print('Number of activities in history: ${activityCubit.state.recentActivities.length}');
       });
     } catch (e) {
       setState(() {
         activityName = "Failed to load activity";
+        activityType = "None";
         activityPrice = 0;
       });
     } finally {
@@ -47,8 +49,8 @@ class _MyHomePageState extends State<MyHomePage> {
   
   @override
   Widget build(BuildContext context) {
-     final activityType = context.watch<ActivityCubit>();
-     List<String> type = activityType.state.recentActivities.map((e) => e.type ?? '').toList();
+    final activityCubit = context.read<ActivityCubit>();
+    Set<String> type = activityCubit.state.recentActivities.map((e) => e.type ?? '').toSet();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -63,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 : Column(
                     children: [
                       Text('Activity Name : $activityName'),
+                      Text('Type : $activityType'),
                       Text('Price : $activityPrice')
                     ],
                   ),
@@ -72,14 +75,13 @@ class _MyHomePageState extends State<MyHomePage> {
               hint: Text("Select Activity Type"),
               onChanged: (String? newValue) {
                 setState(() {
-                  _selectedActivityType = newValue ?? '';
+                _selectedActivityType = newValue ?? '';
                 });
-                final activityCubit = context.read<ActivityCubit>();
                 activityCubit.setSelectedActivityType(_selectedActivityType); 
               },
               items: type.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
-                  value: value,
+                  value: value.toString(),
                   child: Text(value),
                 );
               }).toList(),

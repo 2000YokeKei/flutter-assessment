@@ -17,16 +17,15 @@ class Activity {
     this.accessibility,
   });
 
-  // From JSON
   factory Activity.fromJson(Map<String, dynamic> json) {
     return Activity(
       activity: json['activity'],
       type: json['type'],
       participants: json['participants'],
-      price: (json['price'] as num).toDouble(), // Convert to double
+      price: (json['price'] as num).toDouble(), 
       link: json['link'],
       key: json['key'],
-      accessibility: (json['accessibility'] as num).toDouble(), // Convert to double
+      accessibility: (json['accessibility'] as num).toDouble(), 
     );
   }
 

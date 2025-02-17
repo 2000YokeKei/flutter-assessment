@@ -15,6 +15,7 @@ class HistoryPage extends StatelessWidget {
       body: BlocBuilder<ActivityCubit, ActivityState>(
         builder: (context, state) {
           final activities = state.recentActivities;
+          final selectedActivityType = state.selectedActivityType;
 
           if (activities.isEmpty) {
             return Center(
@@ -27,6 +28,7 @@ class HistoryPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final activity = activities[index];
               return ListTile(
+                tileColor: activity.type == selectedActivityType? Colors.greenAccent : null,
                 title: Text(activity.activity ?? 'No Activity Name'),
                 subtitle: Text('Price: \$${activity.price?.toStringAsFixed(2) ?? '0.00'}'),
               );
